@@ -19,7 +19,7 @@ static int __fflush_unlocked(FILE *f)
 }
 
 /* stdout.c will override this if linked */
-static FILE *const dummy = 0;
+static FILE *volatile dummy = 0;
 weak_alias(dummy, __stdout_used);
 
 int fflush(FILE *f)
@@ -35,13 +35,12 @@ int fflush(FILE *f)
 
 	r = __stdout_used ? fflush(__stdout_used) : 0;
 
-	OFLLOCK();
-	for (f=libc.ofl_head; f; f=f->next) {
+	for (f=*__ofl_lock(); f; f=f->next) {
 		FLOCK(f);
 		if (f->wpos > f->wbase) r |= __fflush_unlocked(f);
 		FUNLOCK(f);
 	}
-	OFLUNLOCK();
+	__ofl_unlock();
 	
 	return r;
 }

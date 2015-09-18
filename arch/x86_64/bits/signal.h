@@ -1,6 +1,11 @@
 #if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE) \
  || defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
 
+#if defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
+#define MINSIGSTKSZ 2048
+#define SIGSTKSZ 8192
+#endif
+
 #ifdef _GNU_SOURCE
 #define REG_R8          0
 #define REG_R9          1
@@ -59,6 +64,12 @@ typedef struct {
 	unsigned long __space[32];
 } mcontext_t;
 #endif
+
+struct sigaltstack {
+	void *ss_sp;
+	int ss_flags;
+	size_t ss_size;
+};
 
 typedef struct __ucontext {
 	unsigned long uc_flags;

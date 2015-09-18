@@ -1,6 +1,11 @@
 #if defined(_POSIX_SOURCE) || defined(_POSIX_C_SOURCE) \
  || defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
 
+#if defined(_XOPEN_SOURCE) || defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
+#define MINSIGSTKSZ 4096
+#define SIGSTKSZ 10240
+#endif
+
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
 
 typedef unsigned long greg_t, gregset_t[48];
@@ -48,6 +53,12 @@ typedef struct {
 } mcontext_t;
 
 #endif
+
+struct sigaltstack {
+	void *ss_sp;
+	int ss_flags;
+	size_t ss_size;
+};
 
 typedef struct __ucontext {
 	unsigned long uc_flags;

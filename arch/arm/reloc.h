@@ -1,5 +1,3 @@
-#include <string.h>
-#include <elf.h>
 #include <endian.h>
 
 #if __BYTE_ORDER == __BIG_ENDIAN
@@ -16,41 +14,24 @@
 
 #define LDSO_ARCH "arm" ENDIAN_SUFFIX FP_SUFFIX
 
-#define IS_COPY(x) ((x)==R_ARM_COPY)
-#define IS_PLT(x) ((x)==R_ARM_JUMP_SLOT)
-
-static inline void do_single_reloc(
-	struct dso *self, unsigned char *base_addr,
-	size_t *reloc_addr, int type, size_t addend,
-	Sym *sym, size_t sym_size,
-	struct symdef def, size_t sym_val)
-{
-	switch(type) {
-	case R_ARM_ABS32:
-		*reloc_addr += sym_val;
-		break;
-	case R_ARM_GLOB_DAT:
-	case R_ARM_JUMP_SLOT:
-		*reloc_addr = sym_val;
-		break;
-	case R_ARM_RELATIVE:
-		*reloc_addr += (size_t)base_addr;
-		break;
-	case R_ARM_COPY:
-		memcpy(reloc_addr, (void *)sym_val, sym_size);
-		break;
-	case R_ARM_TLS_DTPMOD32:
-		*reloc_addr = def.dso ? def.dso->tls_id : self->tls_id;
-		break;
-	case R_ARM_TLS_DTPOFF32:
-		*reloc_addr += def.sym->st_value;
-		break;
-	case R_ARM_TLS_TPOFF32:
-		*reloc_addr += def.sym
-			? def.sym->st_value + def.dso->tls_offset + 8
-			: self->tls_offset + 8;
-		break;
-	}
-}
-
 #define NO_LEGACY_INITFINI
+
+#define TPOFF_K 8
+
+#define REL_SYMBOLIC    R_ARM_ABS32
+#define REL_GOT         R_ARM_GLOB_DAT
+#define REL_PLT         R_ARM_JUMP_SLOT
+#define REL_RELATIVE    R_ARM_RELATIVE
+#define REL_COPY        R_ARM_COPY
+#define REL_DTPMOD      R_ARM_TLS_DTPMOD32
+#define REL_DTPOFF      R_ARM_TLS_DTPOFF32
+#define REL_TPOFF       R_ARM_TLS_TPOFF32
+//#define REL_TLSDESC     R_ARM_TLS_DESC
+
+#ifdef __thumb__
+#define CRTJMP(pc,sp) __asm__ __volatile__( \
+	"mov sp,%1 ; bx %0" : : "r"(pc), "r"(sp) : "memory" )
+#else
+#define CRTJMP(pc,sp) __asm__ __volatile__( \
+	"mov sp,%1 ; tst %0,#1 ; moveq pc,%0 ; bx %0" : : "r"(pc), "r"(sp) : "memory" )
+#endif

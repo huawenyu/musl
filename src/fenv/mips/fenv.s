@@ -57,7 +57,10 @@ fegetenv:
 .global fesetenv
 .type  fesetenv,@function
 fesetenv:
+	addiu   $5, $4, 1
+	beq     $5, $0, 1f
+	 nop
 	lw      $5, 0($4)
-	ctc1    $5, $31
+1:	ctc1    $5, $31
 	jr      $ra
 	li      $2, 0

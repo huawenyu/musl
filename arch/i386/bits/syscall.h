@@ -349,6 +349,14 @@
 #define __NR_process_vm_writev	348
 #define __NR_kcmp		349
 #define __NR_finit_module	350
+#define __NR_sched_setattr	351
+#define __NR_sched_getattr	352
+#define __NR_renameat2		353
+#define __NR_seccomp		354
+#define __NR_getrandom		355
+#define __NR_memfd_create	356
+#define __NR_bpf		357
+#define __NR_execveat		358
 
 
 /* Repeated with SYS_ prefix */
@@ -704,3 +712,11 @@
 #define SYS_process_vm_writev	348
 #define SYS_kcmp		349
 #define SYS_finit_module	350
+#define SYS_sched_setattr	351
+#define SYS_sched_getattr	352
+#define SYS_renameat2		353
+#define SYS_seccomp		354
+#define SYS_getrandom		355
+#define SYS_memfd_create	356
+#define SYS_bpf			357
+#define SYS_execveat		358

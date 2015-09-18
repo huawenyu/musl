@@ -149,7 +149,7 @@ uint16_t ntohs(uint16_t);
         (IN6_IS_ADDR_MULTICAST(a) && ((((uint8_t *) (a))[1] & 0xf) == 0xe))
 
 #define __ARE_4_EQUAL(a,b) \
-	(!( 0[a]-0[b] | 1[a]-1[b] | 2[a]-2[b] | 3[a]-3[b] ))
+	(!( (0[a]-0[b]) | (1[a]-1[b]) | (2[a]-2[b]) | (3[a]-3[b]) ))
 #define IN6_ARE_ADDR_EQUAL(a,b) \
 	__ARE_4_EQUAL((const uint32_t *)(a), (const uint32_t *)(b))
 
@@ -198,6 +198,8 @@ uint16_t ntohs(uint16_t);
 #define IP_ORIGDSTADDR     20
 #define IP_RECVORIGDSTADDR IP_ORIGDSTADDR
 #define IP_MINTTL          21
+#define IP_NODEFRAG        22
+#define IP_CHECKSUM        23
 #define IP_MULTICAST_IF    32
 #define IP_MULTICAST_TTL   33
 #define IP_MULTICAST_LOOP  34
@@ -211,27 +213,14 @@ uint16_t ntohs(uint16_t);
 #define IP_MULTICAST_ALL   49
 #define IP_UNICAST_IF      50
 
-#if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
-#define MCAST_JOIN_GROUP   42
-#define MCAST_BLOCK_SOURCE 43
-#define MCAST_UNBLOCK_SOURCE      44
-#define MCAST_LEAVE_GROUP  45
-#define MCAST_JOIN_SOURCE_GROUP   46
-#define MCAST_LEAVE_SOURCE_GROUP  47
-#define MCAST_MSFILTER     48
-
-#define MCAST_EXCLUDE 0
-#define MCAST_INCLUDE 1
-#endif
-
 #define IP_RECVRETOPTS IP_RETOPTS
 
 #define IP_PMTUDISC_DONT   0
 #define IP_PMTUDISC_WANT   1
 #define IP_PMTUDISC_DO     2
 #define IP_PMTUDISC_PROBE  3
-
-#define SOL_IP 0
+#define IP_PMTUDISC_INTERFACE 4
+#define IP_PMTUDISC_OMIT   5
 
 #define IP_DEFAULT_MULTICAST_TTL        1
 #define IP_DEFAULT_MULTICAST_LOOP       1
@@ -242,6 +231,19 @@ struct ip_opts
 	struct in_addr ip_dst;
 	char ip_opts[40];
 };
+
+#if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
+
+#define MCAST_JOIN_GROUP   42
+#define MCAST_BLOCK_SOURCE 43
+#define MCAST_UNBLOCK_SOURCE      44
+#define MCAST_LEAVE_GROUP  45
+#define MCAST_JOIN_SOURCE_GROUP   46
+#define MCAST_LEAVE_SOURCE_GROUP  47
+#define MCAST_MSFILTER     48
+
+#define MCAST_EXCLUDE 0
+#define MCAST_INCLUDE 1
 
 struct ip_mreq
 {
@@ -273,7 +275,6 @@ struct ip_msfilter {
 	(sizeof(struct ip_msfilter) - sizeof(struct in_addr) \
 	+ (numsrc) * sizeof(struct in_addr))
 
-#if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)
 struct group_req {
 	uint32_t gr_interface;
 	struct sockaddr_storage gr_group;
@@ -295,7 +296,6 @@ struct group_filter {
 #define GROUP_FILTER_SIZE(numsrc) \
 	(sizeof(struct group_filter) - sizeof(struct sockaddr_storage) \
 	+ (numsrc) * sizeof(struct sockaddr_storage))
-#endif
 
 struct in_pktinfo
 {
@@ -315,6 +315,7 @@ struct ip6_mtuinfo
 	struct sockaddr_in6 ip6m_addr;
 	uint32_t ip6m_mtu;
 };
+#endif
 
 #define IPV6_ADDRFORM           1
 #define IPV6_2292PKTINFO        2
@@ -324,7 +325,6 @@ struct ip6_mtuinfo
 #define IPV6_2292PKTOPTIONS     6
 #define IPV6_CHECKSUM           7
 #define IPV6_2292HOPLIMIT       8
-#define SCM_SRCRT               IPV6_RXSRCRT
 #define IPV6_NEXTHOP            9
 #define IPV6_AUTHHDR            10
 #define IPV6_UNICAST_HOPS       16
@@ -354,23 +354,38 @@ struct ip6_mtuinfo
 #define IPV6_RTHDR              57
 #define IPV6_RECVDSTOPTS        58
 #define IPV6_DSTOPTS            59
-
+#define IPV6_RECVPATHMTU        60
+#define IPV6_PATHMTU            61
+#define IPV6_DONTFRAG           62
 #define IPV6_RECVTCLASS         66
 #define IPV6_TCLASS             67
+#define IPV6_AUTOFLOWLABEL      70
+#define IPV6_ADDR_PREFERENCES   72
+#define IPV6_MINHOPCOUNT        73
+#define IPV6_ORIGDSTADDR        74
+#define IPV6_RECVORIGDSTADDR    IPV6_ORIGDSTADDR
+#define IPV6_TRANSPARENT        75
+#define IPV6_UNICAST_IF         76
 
 #define IPV6_ADD_MEMBERSHIP     IPV6_JOIN_GROUP
 #define IPV6_DROP_MEMBERSHIP    IPV6_LEAVE_GROUP
 #define IPV6_RXHOPOPTS          IPV6_HOPOPTS
 #define IPV6_RXDSTOPTS          IPV6_DSTOPTS
 
-
 #define IPV6_PMTUDISC_DONT      0
 #define IPV6_PMTUDISC_WANT      1
 #define IPV6_PMTUDISC_DO        2
 #define IPV6_PMTUDISC_PROBE     3
+#define IPV6_PMTUDISC_INTERFACE 4
+#define IPV6_PMTUDISC_OMIT      5
 
-#define SOL_IPV6        41
-#define SOL_ICMPV6      58
+#define IPV6_PREFER_SRC_TMP            0x0001
+#define IPV6_PREFER_SRC_PUBLIC         0x0002
+#define IPV6_PREFER_SRC_PUBTMP_DEFAULT 0x0100
+#define IPV6_PREFER_SRC_COA            0x0004
+#define IPV6_PREFER_SRC_HOME           0x0400
+#define IPV6_PREFER_SRC_CGA            0x0008
+#define IPV6_PREFER_SRC_NONCGA         0x0800
 
 #define IPV6_RTHDR_LOOSE        0
 #define IPV6_RTHDR_STRICT       1

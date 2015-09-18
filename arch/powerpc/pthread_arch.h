@@ -12,8 +12,11 @@ static inline struct pthread *__pthread_self()
 #define TLS_ABOVE_TP
 #define TP_ADJ(p) ((char *)(p) + sizeof(struct pthread) + 0x7000)
 
+#define DTP_OFFSET 0x8000
+
 // offset of the PC register in mcontext_t, divided by the system wordsize
 // the kernel calls the ip "nip", it's the first saved value after the 32
 // GPRs.
 #define CANCEL_REG_IP 32
 
+#define CANARY canary_at_end

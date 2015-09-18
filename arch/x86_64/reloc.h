@@ -1,46 +1,15 @@
-#include <stdint.h>
-#include <string.h>
-#include <elf.h>
-
 #define LDSO_ARCH "x86_64"
 
-#define IS_COPY(x) ((x)==R_X86_64_COPY)
-#define IS_PLT(x) ((x)==R_X86_64_JUMP_SLOT)
+#define REL_SYMBOLIC    R_X86_64_64
+#define REL_OFFSET32    R_X86_64_PC32
+#define REL_GOT         R_X86_64_GLOB_DAT
+#define REL_PLT         R_X86_64_JUMP_SLOT
+#define REL_RELATIVE    R_X86_64_RELATIVE
+#define REL_COPY        R_X86_64_COPY
+#define REL_DTPMOD      R_X86_64_DTPMOD64
+#define REL_DTPOFF      R_X86_64_DTPOFF64
+#define REL_TPOFF       R_X86_64_TPOFF64
+#define REL_TLSDESC     R_X86_64_TLSDESC
 
-static inline void do_single_reloc(
-	struct dso *self, unsigned char *base_addr,
-	size_t *reloc_addr, int type, size_t addend,
-	Sym *sym, size_t sym_size,
-	struct symdef def, size_t sym_val)
-{
-	switch(type) {
-	case R_X86_64_GLOB_DAT:
-	case R_X86_64_JUMP_SLOT:
-	case R_X86_64_64:
-		*reloc_addr = sym_val + addend;
-		break;
-	case R_X86_64_32:
-		*(uint32_t *)reloc_addr = sym_val + addend;
-		break;
-	case R_X86_64_PC32:
-		*reloc_addr = sym_val + addend - (size_t)reloc_addr + (size_t)base_addr;
-		break;
-	case R_X86_64_RELATIVE:
-		*reloc_addr = (size_t)base_addr + addend;
-		break;
-	case R_X86_64_COPY:
-		memcpy(reloc_addr, (void *)sym_val, sym_size);
-		break;
-	case R_X86_64_DTPMOD64:
-		*reloc_addr = def.dso ? def.dso->tls_id : self->tls_id;
-		break;
-	case R_X86_64_DTPOFF64:
-		*reloc_addr = def.sym->st_value + addend;
-		break;
-	case R_X86_64_TPOFF64:
-		*reloc_addr = (def.sym
-			? def.sym->st_value - def.dso->tls_offset
-			: 0 - self->tls_offset) + addend;
-		break;
-	}
-}
+#define CRTJMP(pc,sp) __asm__ __volatile__( \
+	"mov %1,%%rsp ; jmp *%0" : : "r"(pc), "r"(sp) : "memory" )

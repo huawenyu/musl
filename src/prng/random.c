@@ -1,10 +1,3 @@
-/*
- * random.c - Copyright © 2011 Szabolcs Nagy
- * Permission to use, copy, modify, and/or distribute this code
- * for any purpose with or without fee is hereby granted.
- * There is no warranty.
-*/
-
 #include <stdlib.h>
 #include <stdint.h>
 #include "libc.h"
@@ -12,11 +5,7 @@
 /*
 this code uses the same lagged fibonacci generator as the
 original bsd random implementation except for the seeding
-
-different seeds produce different sequences with long period
-(other libcs seed the state with a park-miller generator
-when seed=0 some fail to produce good random sequence
-others produce the same sequence as another seed)
+which was broken in the original
 */
 
 static uint32_t init[] = {
@@ -33,7 +22,7 @@ static int n = 31;
 static int i = 3;
 static int j = 0;
 static uint32_t *x = init+1;
-static int lock[2];
+static volatile int lock[2];
 
 static uint32_t lcg31(uint32_t x) {
 	return (1103515245*x + 12345) & 0x7fffffff;
@@ -98,6 +87,7 @@ char *initstate(unsigned seed, char *state, size_t size) {
 		n = 63;
 	x = (uint32_t*)state + 1;
 	__srandom(seed);
+	savestate();
 	UNLOCK(lock);
 	return old;
 }

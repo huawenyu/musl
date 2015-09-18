@@ -41,7 +41,7 @@ struct addrinfo
 #define NI_NOFQDN       0x04
 #define NI_NAMEREQD     0x08
 #define NI_DGRAM        0x10
-/*#define NI_NUMERICSCOPE */
+#define NI_NUMERICSCOPE 0x100
 
 #define EAI_BADFLAGS   -1
 #define EAI_NONAME     -2
@@ -131,6 +131,7 @@ int *__h_errno_location(void);
 #define TRY_AGAIN      2
 #define NO_RECOVERY    3
 #define NO_DATA        4
+#define NO_ADDRESS     NO_DATA
 #endif
 
 #if defined(_GNU_SOURCE) || defined(_BSD_SOURCE)

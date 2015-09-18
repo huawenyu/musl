@@ -1,24 +1,14 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include "__dns.h"
 
 in_addr_t inet_network(const char *p)
 {
 	return ntohl(inet_addr(p));
 }
 
-int inet_aton(const char *cp, struct in_addr *inp)
+struct in_addr inet_makeaddr(in_addr_t n, in_addr_t h)
 {
-	struct sockaddr_in sin;
-	if (__ipparse(&sin, AF_INET, cp) < 0) return 0;
-	*inp = sin.sin_addr;
-	return 1;
-}
-
-struct in_addr inet_makeaddr(int net, int host)
-{
-	uint32_t n = net, h = host;
 	if (n < 256) h |= n<<24;
 	else if (n < 65536) h |= n<<16;
 	else h |= n<<8;
